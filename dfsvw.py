@@ -15,9 +15,7 @@ Python version: 2"""
 import sys
 import re
 
-linkRE = re.compile(r'(?<=\[\[)\w+(?=[|\]])', re.UNICODE)
-nameRE = re.compile(r'(?<=[|\[])[^|\[\]]+(?=\]\])', re.UNICODE)
-
+linkRE = re.compile(r'\[\[([^\\\]|#]+)(?:#[^\\\]|]+)?(?:\|([^\\\]]+))?\]\]', re.UNICODE)
 
 def probeLink(s):
     """
@@ -26,7 +24,7 @@ def probeLink(s):
     >>> probeLink('   [[]]')
     []
     >>> probeLink('   [[abc]]   [[abc|123]]  ')
-    [('abc', 'abc'), ('abc', '123')]
+    [('abc', ''), ('abc', '123')]
     >>> a, b = probeLink(' [[中文1|中文2]]')[0]; print a, b
     中文1 中文2
     >>> probeLink(' [[abc|abc 123]]')
@@ -36,7 +34,7 @@ def probeLink(s):
         ns = s.decode('utf8')
     except UnicodeDecodeError:
         return []
-    ret = zip(linkRE.findall(ns), nameRE.findall(ns))
+    ret = linkRE.findall(ns)
     return [(a.encode('utf8'), b.encode('utf8')) for a, b in ret]
 
 
@@ -56,6 +54,8 @@ def probeAllLink(fn):
 def outputNode(link, name, level):
     """output one wiki node, level for vimwiki tree hierarchy"""
     prefix = " " * 4 * level
+    if not name:
+        name = link
     dct = {"prefix":prefix, "link":link, "name":name}
     if sys.stdout.isatty():
         fmt = "{prefix}{name}"
@@ -71,21 +71,20 @@ def dfs(index):
     """depth first search on vimwiki
     skip searched wiki file to avoid deadloop"""
     index = index.decode('utf8')
-    lst = [(index, index, 0)]
-    hist = []
+    lst = [(index, index, [])]
     while 1:
         try:
-            link, name, level = lst.pop(0)
+            link, name, hist = lst.pop(0)
         except IndexError:
             break
         if link in hist:
-            print >> sys.stderr, "link {} already in map".format(link)
+            print >> sys.stderr, "link {} is in a circle".format(link)
             continue
+        hist = hist[:]
+        outputNode(link, name, len(hist))
         hist.append(link)
-        outputNode(link, name, level)
         ret = probeAllLink(link + '.wiki')
-        level += 1
-        levelret = [(node[0], node[1], level) for node in ret]
+        levelret = [(node[0], node[1], hist) for node in ret]
         lst = levelret + lst
 
 if __name__ == "__main__":
