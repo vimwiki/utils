@@ -5,11 +5,11 @@
 # This script requires `tree` to be installed.
 
 # Print header
-echo '= Wiki contents ='
+echo '= Table of contents ='
 echo
 
 cd "$1"
-while read -r line; do
+while IFS='' read -r line; do
   # Assuming there are no files with ── in their name.
   filename="$(<<<"$line" sed -r 's/.*── (.*)/\1/' )"
   treetrunk="$(<<<"$line" sed -r 's/(.*── ).*/\1/')"
