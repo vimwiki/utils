@@ -1,18 +1,19 @@
 #!/usr/bin/env bash
 # Create a linkified vimwiki tree of the specified directory and subdirectories.
-# It takes one argument: the base directory of the vimwiki.
+# It takes one optional argument: the base directory of the vimwiki.
+# Otherwise, the current directory is assumed to be the base directory.
 # For the links to make sense, save the output of this script into a file located in this base directory.
-# This script requires `tree` to be installed.
+# This script requires `tree` and `perl` to be installed.
+
+cd "$1" # If there is no argument supplied, this will not change the current directory.
 
 # Print header
 echo '= Table of contents ='
-echo
 
-cd "$1"
 while IFS='' read -r line; do
-  # Assuming there are no files with ── in their name.
-  filename="$(<<<"$line" sed -r 's/.*── (.*)/\1/' )"
-  treetrunk="$(<<<"$line" sed -r 's/(.*── ).*/\1/')"
+  # Use perl regex in case there are files with ── in their name.
+  filename="$(<<<"$line" perl -pe 's/.*?── (.*)/\1/' )"
+  treetrunk="$(<<<"$line" perl -pe 's/(.*?── ).*/\1/')"
 
   # Calculate depth of current file, where 1 is current directory.
   depth=$(( $(<<<"$treetrunk" wc -m ) / 4 ))
