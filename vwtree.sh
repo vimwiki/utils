@@ -7,7 +7,29 @@
 
 cd "$1" # If there is no argument supplied, this will not change the current directory.
 
-# Print header
+# Print todo header
+echo '= Todo items ='
+
+# If a todo item is found, print the relevant information.
+function print_matches() {
+  todo_pattern='^\s*[*-] \[ \]'
+  if grep -q "$todo_pattern" "$1"; then
+    matches="$(grep "$todo_pattern" "$1")"
+    # Format page_name for vimwiki syntax, i.e. no leading `./` or trailing `.wiki`
+    page_name="$(echo $1 | sed -r 's/^.\/(.*).wiki/\1/')"
+    # Escape literal slashes, otherwise the next sed will choke.
+    escaped_page_name="$(echo "$page_name" | sed 's,/,\\/,g')"
+    printf %s "$matches" | sed "s/^/* [[${escaped_page_name}]]: /"
+    echo
+  fi
+}
+
+# Search for todo items
+export -f print_matches
+find . -name '*.wiki' -exec bash -c 'print_matches "$0"' {} \;
+echo
+
+# Print contents header
 echo '= Table of contents ='
 
 while IFS='' read -r line; do
