@@ -25,6 +25,13 @@ class TestVWUnfinished(unittest.TestCase):
         counter = UnfinishedTasksCounter(text=simple_text, section="## Todo")
         assert counter.text == "## Todo\n\n* [ ] Finish vimwiki article"  # Or ending with \n?
 
+    def test_sublists_counter(self):
+        counter = UnfinishedTasksCounter(text=text_with_sublists, count_sublists=True)
+        assert counter.count_unfinished_tasks() == 5
+
+        counter = UnfinishedTasksCounter(text=text_with_sublists, count_sublists=False)
+        assert counter.count_unfinished_tasks() == 3
+
 
 simple_text = """# 2019-05-18
 
@@ -49,4 +56,14 @@ multiple_list_types_text = """# Text with more list types
 ## List with asterisks
 
 * [ ] And here we use asterisk
+"""
+
+
+text_with_sublists = """# Text with sublists
+
+- [ ] Some simple task
+- [ ] Major task composed of multiple actions
+    - [ ] Some nested task
+    - [ ] Another minor task
+- [ ] Another simple task
 """

@@ -1,9 +1,10 @@
 class UnfinishedTasksCounter(object):
-    def __init__(self, path=None, text=None, section=None, bullets=None):
+    def __init__(self, path=None, text=None, section=None, bullets=None, count_sublists=True):
         self.path = path
         self.bullets = bullets or ["-", "*"]
         self.section = section
         self._text = text
+        self.count_sublists = count_sublists
 
     @property
     def text(self):
@@ -18,12 +19,18 @@ class UnfinishedTasksCounter(object):
     def unfinished_bullet_str(self):
         return tuple(["{} [ ]".format(x) for x in self.bullets])
 
-    def count_unfinished_tasks(self):
-        count = 0
+    @property
+    def unfinished_tasks(self):
+        tasks = []
         for line in self.text.split("\n"):
+            if self.count_sublists:
+                line = line.strip()
             if line.startswith(self.unfinished_bullet_str):
-                count += 1
-        return count
+                tasks.append(line)
+        return tasks
+
+    def count_unfinished_tasks(self):
+        return len(self.unfinished_tasks)
 
 
 def vimwiki_unfinished_tasks():
