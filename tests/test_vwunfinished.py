@@ -1,11 +1,13 @@
+import datetime
 import unittest
+from mock import patch, Mock
 
 # Enable importing modules from parent directory
 import os
 parentdir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 os.sys.path.insert(0, parentdir)
 
-from vwunfinished import UnfinishedTasksCounter
+from vwunfinished import UnfinishedTasksCounter, parser
 
 
 class TestVWUnfinished(unittest.TestCase):
@@ -83,3 +85,52 @@ simple_text_vimwiki_syntax = """= 2019-05-18 =
 
 * [ ] Finish vimwiki article
 """
+
+
+class TestArgparser(unittest.TestCase):
+    def test_input(self):
+        cmd = "--path /foo/bar/baz.md"
+        args = parser.parse_args(cmd.split())
+        assert args.path == "/foo/bar/baz.md"
+
+        cmd = "--date 2019-05-19"
+        args = parser.parse_args(cmd.split())
+        assert args.date == "2019-05-19"
+
+        cmd = "--today"
+        args = parser.parse_args(cmd.split())
+        # assert args.date == "2019-05-20"  # @FIXME
+
+    def test_section(self):
+        cmd = ["--path", "foo.md", "--section", "## Todo"]
+        args = parser.parse_args(cmd)
+        assert args.section == "## Todo"
+
+        cmd = ["--path", "foo.md", "--section", "=== Daily checklist ==="]
+        args = parser.parse_args(cmd)
+        assert args.section == "=== Daily checklist ==="
+
+    @patch("os.path.expanduser", side_effect=lambda x: x.replace("~", "/home/mockee"))
+    def test_paths(self, *args):
+        cmd = ["--date", "2019-05-19", "--wiki-path", "~/vimwiki-alternative", "--diary-dir", "diary-alt"]
+        args = parser.parse_args(cmd)
+        assert args.wiki_path == "/home/mockee/vimwiki-alternative"
+        assert args.diary_dir == "diary-alt"
+
+    def test_bullets(self):
+        cmd = "--path foo.md --bullets=*-"
+        args = parser.parse_args(cmd.split())
+        assert args.bullets == ["*", "-"]
+
+        cmd = "--path foo.md --bullets=*"
+        args = parser.parse_args(cmd.split())
+        assert args.bullets == ["*"]
+
+    def test_count_sublists(self):
+        cmd = "--path foo.md"
+        args = parser.parse_args(cmd.split())
+        assert not args.count_sublists
+
+        cmd = "--path foo.md --count-sublists"
+        args = parser.parse_args(cmd.split())
+        assert args.count_sublists
