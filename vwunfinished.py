@@ -1,4 +1,5 @@
 import os
+import sys
 import argparse
 from datetime import datetime
 
@@ -60,6 +61,8 @@ def vimwiki_unfinished_tasks():
 
 def main():
     args = parser.parse_args()
+    if not os.path.exists(args.path):
+        sys.exit(11)
     counter = UnfinishedTasksCounter(path=args.path, section=args.section, bullets=args.bullets,
                                      count_sublists=args.count_sublists)
     print(counter.count_unfinished_tasks())
