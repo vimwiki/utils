@@ -25,6 +25,9 @@ class TestVWUnfinished(unittest.TestCase):
         counter = UnfinishedTasksCounter(text=simple_text, section="## Todo")
         assert counter.text == "## Todo\n\n* [ ] Finish vimwiki article"  # Or ending with \n?
 
+        counter = UnfinishedTasksCounter(text=simple_text_vimwiki_syntax, section="== Todo ==")
+        assert counter.text == "== Todo ==\n\n* [ ] Finish vimwiki article"  # Or ending with \n?
+
     def test_sublists_counter(self):
         counter = UnfinishedTasksCounter(text=text_with_sublists, count_sublists=True)
         assert counter.count_unfinished_tasks() == 5
@@ -66,4 +69,17 @@ text_with_sublists = """# Text with sublists
     - [ ] Some nested task
     - [ ] Another minor task
 - [ ] Another simple task
+"""
+
+
+simple_text_vimwiki_syntax = """= 2019-05-18 =
+
+== Daily checklist ==
+
+* [ ] Take a vitamin C
+* [X] Eat your daily carrot!
+
+== Todo ==
+
+* [ ] Finish vimwiki article
 """
