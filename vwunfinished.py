@@ -26,7 +26,7 @@ def vimwiki_unfinished_tasks(path=None, date=None, section=None, bullets=None, c
                              wiki_path=None, diary_dir=None, filetype=None):
     """
     Return a count of unfinished tasks in specified vimwiki file
-    Consider this function to be an API. It's attributes and return type will remain backwards compatible.
+    Consider this function to be an API. Its attributes and return type will remain backwards compatible.
 
     :param str path: Path to a vimwiki file
     :param str date: Use diary file for given date (in YYYY-MM-DD format)
