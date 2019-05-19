@@ -8,10 +8,13 @@ import os
 parentdir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 os.sys.path.insert(0, parentdir)
 
-from vwunfinished import UnfinishedTasksCounter, VimwikiFileProvider, parser
+from vwunfinished import (UnfinishedTasksCounter,
+                          VimwikiFileProvider,
+                          vimwiki_unfinished_tasks,
+                          parser,)
 
 
-class TestVWUnfinished(unittest.TestCase):
+class TestUnfinishedTasksCounter(unittest.TestCase):
 
     def test_count_unfinished_tasks(self):
         counter = UnfinishedTasksCounter(text=simple_text)
@@ -117,7 +120,16 @@ class TestVimwikiFileProvider(unittest.TestCase):
         assert "## Daily checklist" in provider.content
 
 
+class TestUnfinishedTasksFunction(unittest.TestCase):
+
+    @patch("{}.open".format(six.moves.builtins.__name__), mock_open(read_data=simple_text))
+    def test_vimwiki_unfinished_tasks(self):
+        assert vimwiki_unfinished_tasks(path="whatever-we-mock-it.md") == 2
+        assert vimwiki_unfinished_tasks(path="whatever-we-mock-it.md", section="## Daily checklist") == 1
+
+
 class TestArgparser(unittest.TestCase):
+
     def test_input(self):
         cmd = "--path /foo/bar/baz.md"
         args = parser.parse_args(cmd.split())

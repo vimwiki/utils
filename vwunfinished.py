@@ -22,6 +22,33 @@ input_parser.add_argument("--today", help="Use diary file for today", dest="date
                           action="store_const", const=str(datetime.now().date()))
 
 
+def vimwiki_unfinished_tasks(path=None, date=None, section=None, bullets=None, count_sublists=None,
+                             wiki_path=None, diary_dir=None, filetype=None):
+    """
+    Return a count of unfinished tasks in specified vimwiki file
+    Consider this function to be an API. It's attributes and return type will remain backwards compatible.
+
+    :param str path: Path to a vimwiki file
+    :param str date: Use diary file for given date (in YYYY-MM-DD format)
+    :param str section: Count tasks only in specified section (e.g. '== Daily checklist ==')
+    :param list bullets: Bullet symbols, e.g. ["*", "-"]
+    :param bool count_sublists: Do you wish to count sublists?
+    :param str wiki_path: Use nonstandard wiki path (can contain ~ for home directory)
+    :param str diary_dir: Use nonstandard diary directory
+    :param str filetype: Either "wiki" or "md"
+
+    :raise: ValueError if there is not enough information to determine a wiki file
+    :raise: IOError if wiki file doesn't exist
+
+    :return: int
+    """
+    provider = VimwikiFileProvider(path=path, date=date, wiki_path=wiki_path,
+                                   diary_dir=diary_dir, filetype=filetype)
+    counter = UnfinishedTasksCounter(text=provider.content, section=section, bullets=bullets,
+                                     count_sublists=count_sublists)
+    return counter.count_unfinished_tasks()
+
+
 class UnfinishedTasksCounter(object):
     def __init__(self, text=None, section=None, bullets=None, count_sublists=True):
         self.bullets = bullets or ["-", "*"]
@@ -81,21 +108,12 @@ class VimwikiFileProvider(object):
             return f.read()
 
 
-def vimwiki_unfinished_tasks():
-    # API
-    pass
-
-
 def main():
     args = parser.parse_args()
     if not os.path.exists(args.path):
         sys.exit(11)
 
-    provider = VimwikiFileProvider(path=args.path, date=args.date, wiki_path=args.wiki_path,
-                                   diary_dir=args.diary_dir, filetype=args.filetype)
-    counter = UnfinishedTasksCounter(text=provider.content, section=args.section, bullets=args.bullets,
-                                     count_sublists=args.count_sublists)
-    print(counter.count_unfinished_tasks())
+    print(vimwiki_unfinished_tasks(**args.__dict__))
 
 
 if __name__ == "__main__":
