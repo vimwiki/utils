@@ -110,10 +110,16 @@ class VimwikiFileProvider(object):
 
 def main():
     args = parser.parse_args()
-    if not os.path.exists(args.path):
+    try:
+        print(vimwiki_unfinished_tasks(**args.__dict__))
+
+    except IOError as ex:
+        print(ex)
         sys.exit(11)
 
-    print(vimwiki_unfinished_tasks(**args.__dict__))
+    except ValueError as ex:
+        print(ex)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
