@@ -100,7 +100,7 @@ class VimwikiFileProvider(object):
             return os.path.join(*[os.path.expanduser(self.wiki_path), self.diary_dir,
                                   ".".join([self.date, self.filetype])])
 
-        raise ValueError("I have not enough information to determine a file")
+        raise ValueError("I do not have enough information to determine a file")
 
     @property
     def content(self):
