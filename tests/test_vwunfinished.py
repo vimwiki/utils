@@ -3,11 +3,6 @@ import datetime
 import unittest
 from mock import patch, Mock, mock_open
 
-# Enable importing modules from parent directory
-import os
-parentdir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-os.sys.path.insert(0, parentdir)
-
 from vwunfinished import (UnfinishedTasksCounter,
                           VimwikiFileProvider,
                           vimwiki_unfinished_tasks,
