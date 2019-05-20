@@ -107,7 +107,7 @@ class TestVimwikiFileProvider(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             provider = VimwikiFileProvider()
             provider.path
-        assert "not enough information " in str(context.exception)
+        assert "not have enough information " in str(context.exception)
 
     @patch("{}.open".format(six.moves.builtins.__name__), mock_open(read_data=simple_text))
     def test_content(self):
