@@ -6,9 +6,11 @@ import argparse
 from datetime import datetime
 
 parser = argparse.ArgumentParser(description="Count unfinished vimwiki tasks")
-parser.add_argument("--ignore-sublists", action="store_true", help="Do you wish to ignore sublists?")
 parser.add_argument("--section", help="Count tasks only in specified section (e.g. '== Todo =='")
 parser.add_argument("--bullets", help="Bullet symbols (e.g. '*-')", type=list)
+parser.add_argument("--ignore-sublists", action="store_true", help="Do you wish to ignore sublists?")
+parser.add_argument("--indentation-level", type=int,
+                    help="How many characters (spaces or tabs) are before top-level tasks")
 
 parser.add_argument("--diary-dir", default="diary", help="Use nonstandard diary directory")
 parser.add_argument("--wiki-path", default="~/vimwiki", help="Use nonstandard wiki path",
@@ -23,7 +25,7 @@ input_parser.add_argument("--today", help="Use diary file for today", dest="date
 
 
 def vimwiki_unfinished_tasks(path=None, date=None, section=None, bullets=None, ignore_sublists=None,
-                             wiki_path=None, diary_dir=None, filetype=None):
+                             wiki_path=None, diary_dir=None, filetype=None, indentation_level=None):
     """
     Return a count of unfinished tasks in specified vimwiki file
     Consider this function to be an API. Its attributes and return type will remain backwards compatible.
@@ -36,6 +38,7 @@ def vimwiki_unfinished_tasks(path=None, date=None, section=None, bullets=None, i
     :param str wiki_path: Use nonstandard wiki path (can contain ~ for home directory)
     :param str diary_dir: Use nonstandard diary directory
     :param str filetype: Either "wiki" or "md"
+    :param int indentation_level: How many characters (spaces or tabs) are before top-level tasks
 
     :raise: ValueError if there is not enough information to determine a wiki file
     :raise: IOError if wiki file doesn't exist
@@ -45,16 +48,17 @@ def vimwiki_unfinished_tasks(path=None, date=None, section=None, bullets=None, i
     provider = VimwikiFileProvider(path=path, date=date, wiki_path=wiki_path,
                                    diary_dir=diary_dir, filetype=filetype)
     counter = UnfinishedTasksCounter(text=provider.content, section=section, bullets=bullets,
-                                     ignore_sublists=ignore_sublists)
+                                     ignore_sublists=ignore_sublists, indentation_level=indentation_level)
     return counter.count_unfinished_tasks()
 
 
 class UnfinishedTasksCounter(object):
-    def __init__(self, text=None, section=None, bullets=None, ignore_sublists=False):
+    def __init__(self, text=None, section=None, bullets=None, ignore_sublists=False, indentation_level=0):
         self.bullets = bullets or ["-", "*"]
         self.section = section
         self._text = text
         self.ignore_sublists = ignore_sublists
+        self.indentation_level = indentation_level
 
     @property
     def text(self):
@@ -73,6 +77,7 @@ class UnfinishedTasksCounter(object):
     def unfinished_tasks(self):
         tasks = []
         for line in self.text.split("\n"):
+            line = line[self.indentation_level:]
             if not self.ignore_sublists:
                 line = line.strip()
             if line.startswith(self.unfinished_bullet_str):

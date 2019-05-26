@@ -36,6 +36,16 @@ class TestUnfinishedTasksCounter(unittest.TestCase):
         counter = UnfinishedTasksCounter(text=text_with_sublists, ignore_sublists=True)
         assert counter.count_unfinished_tasks() == 3
 
+    def test_toplevel_indented(self):
+        counter = UnfinishedTasksCounter(text=text_with_everything_indented)
+        assert counter.count_unfinished_tasks() == 5
+
+        counter = UnfinishedTasksCounter(text=text_with_everything_indented, ignore_sublists=True)
+        assert counter.count_unfinished_tasks() == 0
+
+        counter = UnfinishedTasksCounter(text=text_with_everything_indented, ignore_sublists=True, indentation_level=2)
+        assert counter.count_unfinished_tasks() == 2
+
 
 simple_text = """# 2019-05-18
 
@@ -83,6 +93,18 @@ simple_text_vimwiki_syntax = """= 2019-05-18 =
 == Todo ==
 
 * [ ] Finish vimwiki article
+"""
+
+
+text_with_everything_indented = """= TODO =
+
+  - [ ] Some long text so this needs
+    to be multi-line
+
+  - [ ] Top-level task, that is indented
+    - [ ] First nesting level
+      - [ ] Second nesting level
+      - [ ] Some micro action
 """
 
 
@@ -171,3 +193,8 @@ class TestArgparser(unittest.TestCase):
         cmd = "--path foo.md --ignore-sublists"
         args = parser.parse_args(cmd.split())
         assert args.ignore_sublists
+
+    def test_indentation_level(self):
+        cmd = "--path foo.md --indentation-level=2"
+        args = parser.parse_args(cmd.split())
+        assert args.indentation_level == 2
