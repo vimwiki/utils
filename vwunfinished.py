@@ -6,7 +6,7 @@ import argparse
 from datetime import datetime
 
 parser = argparse.ArgumentParser(description="Count unfinished vimwiki tasks")
-parser.add_argument("--count-sublists", action="store_true", help="Do you wish to count sublists?")
+parser.add_argument("--ignore-sublists", action="store_true", help="Do you wish to ignore sublists?")
 parser.add_argument("--section", help="Count tasks only in specified section (e.g. '== Todo =='")
 parser.add_argument("--bullets", help="Bullet symbols (e.g. '*-')", type=list)
 
@@ -22,7 +22,7 @@ input_parser.add_argument("--today", help="Use diary file for today", dest="date
                           action="store_const", const=str(datetime.now().date()))
 
 
-def vimwiki_unfinished_tasks(path=None, date=None, section=None, bullets=None, count_sublists=None,
+def vimwiki_unfinished_tasks(path=None, date=None, section=None, bullets=None, ignore_sublists=None,
                              wiki_path=None, diary_dir=None, filetype=None):
     """
     Return a count of unfinished tasks in specified vimwiki file
@@ -32,7 +32,7 @@ def vimwiki_unfinished_tasks(path=None, date=None, section=None, bullets=None, c
     :param str date: Use diary file for given date (in YYYY-MM-DD format)
     :param str section: Count tasks only in specified section (e.g. '== Daily checklist ==')
     :param list bullets: Bullet symbols, e.g. ["*", "-"]
-    :param bool count_sublists: Do you wish to count sublists?
+    :param bool ignore_sublists: Do you wish to ignore sublists?
     :param str wiki_path: Use nonstandard wiki path (can contain ~ for home directory)
     :param str diary_dir: Use nonstandard diary directory
     :param str filetype: Either "wiki" or "md"
@@ -45,16 +45,16 @@ def vimwiki_unfinished_tasks(path=None, date=None, section=None, bullets=None, c
     provider = VimwikiFileProvider(path=path, date=date, wiki_path=wiki_path,
                                    diary_dir=diary_dir, filetype=filetype)
     counter = UnfinishedTasksCounter(text=provider.content, section=section, bullets=bullets,
-                                     count_sublists=count_sublists)
+                                     ignore_sublists=ignore_sublists)
     return counter.count_unfinished_tasks()
 
 
 class UnfinishedTasksCounter(object):
-    def __init__(self, text=None, section=None, bullets=None, count_sublists=True):
+    def __init__(self, text=None, section=None, bullets=None, ignore_sublists=False):
         self.bullets = bullets or ["-", "*"]
         self.section = section
         self._text = text
-        self.count_sublists = count_sublists
+        self.ignore_sublists = ignore_sublists
 
     @property
     def text(self):
@@ -73,7 +73,7 @@ class UnfinishedTasksCounter(object):
     def unfinished_tasks(self):
         tasks = []
         for line in self.text.split("\n"):
-            if self.count_sublists:
+            if not self.ignore_sublists:
                 line = line.strip()
             if line.startswith(self.unfinished_bullet_str):
                 tasks.append(line)

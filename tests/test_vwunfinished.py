@@ -30,10 +30,10 @@ class TestUnfinishedTasksCounter(unittest.TestCase):
         assert counter.text == "== Todo ==\n\n* [ ] Finish vimwiki article"  # Or ending with \n?
 
     def test_sublists_counter(self):
-        counter = UnfinishedTasksCounter(text=text_with_sublists, count_sublists=True)
+        counter = UnfinishedTasksCounter(text=text_with_sublists, ignore_sublists=False)
         assert counter.count_unfinished_tasks() == 5
 
-        counter = UnfinishedTasksCounter(text=text_with_sublists, count_sublists=False)
+        counter = UnfinishedTasksCounter(text=text_with_sublists, ignore_sublists=True)
         assert counter.count_unfinished_tasks() == 3
 
 
@@ -163,11 +163,11 @@ class TestArgparser(unittest.TestCase):
         args = parser.parse_args(cmd.split())
         assert args.bullets == ["*"]
 
-    def test_count_sublists(self):
+    def test_ignore_sublists(self):
         cmd = "--path foo.md"
         args = parser.parse_args(cmd.split())
-        assert not args.count_sublists
+        assert not args.ignore_sublists
 
-        cmd = "--path foo.md --count-sublists"
+        cmd = "--path foo.md --ignore-sublists"
         args = parser.parse_args(cmd.split())
-        assert args.count_sublists
+        assert args.ignore_sublists
