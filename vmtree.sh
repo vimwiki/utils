@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Create a linkified vimwiki tree of the specified directory and subdirectories.
 # It takes one argument: the base directory of the vimwiki.
 # For the links to make sense, save the output of this script into a file located in this base directory.
