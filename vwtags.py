@@ -7,7 +7,7 @@ help_text = """
 Extracts tags from Vimwiki files. Useful for the Tagbar plugin.
 
 Usage:
-Install Tagbar (http://majutsushi.github.io/tagbar/). Then, put this file
+Install Tagbar (https://github.com/preservim/tagbar/). Then, put this file
 anywhere and add the following to your .vimrc:
 
 let g:tagbar_type_vimwiki = {
