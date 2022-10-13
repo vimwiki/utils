@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Create a linkified vimwiki file of unchecked todo items and a tree of the specified directory and
 #   subdirectories. For the links to make sense, save the output of this script into a file located
 #   in this base directory.
